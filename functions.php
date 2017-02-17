@@ -103,3 +103,21 @@ add_filter("gform_init_scripts_footer", "init_scripts");
 function init_scripts() {
 return true;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/* SVG Support */	
+
+
+function bodhi_svgs_disable_real_mime_check( $data, $file, $filename, $mimes ) {
+    $wp_filetype = wp_check_filetype( $filename, $mimes );
+
+    $ext = $wp_filetype['ext'];
+    $type = $wp_filetype['type'];
+    $proper_filename = $data['proper_filename'];
+
+    return compact( 'ext', 'type', 'proper_filename' );
+}
+add_filter( 'wp_check_filetype_and_ext', 'bodhi_svgs_disable_real_mime_check', 10, 4 );
