@@ -121,3 +121,36 @@ function bodhi_svgs_disable_real_mime_check( $data, $file, $filename, $mimes ) {
     return compact( 'ext', 'type', 'proper_filename' );
 }
 add_filter( 'wp_check_filetype_and_ext', 'bodhi_svgs_disable_real_mime_check', 10, 4 );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/* If Modified Since */
+
+add_action('template_redirect', 'last_mod_header');
+
+function last_mod_header($headers) {
+     if( is_singular() ) {
+            $post_id = get_queried_object_id();
+            $LastModified = gmdate("D, d M Y H:i:s \G\M\T", $post_id);
+            $LastModified_unix = gmdate("D, d M Y H:i:s \G\M\T", $post_id);
+            $IfModifiedSince = false;
+            if( $post_id ) {
+                if (isset($_ENV['HTTP_IF_MODIFIED_SINCE']))
+                    $IfModifiedSince = strtotime(substr($_ENV['HTTP_IF_MODIFIED_SINCE'], 5));  
+                if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']))
+                    $IfModifiedSince = strtotime(substr($_SERVER['HTTP_IF_MODIFIED_SINCE'], 5));
+                if ($IfModifiedSince && $IfModifiedSince >= $LastModified_unix) {
+                    header($_SERVER['SERVER_PROTOCOL'] . ' 304 Not Modified');
+                    exit;
+                } 
+     header("Last-Modified: " . get_the_modified_time("D, d M Y H:i:s", $post_id) );
+                }
+        }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+remove_action( 'wp_print_styles', 'print_emoji_styles' );
